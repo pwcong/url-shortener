@@ -4,9 +4,11 @@ import (
 	"net/http"
 
 	"github.com/go-redis/redis"
+	"github.com/jinzhu/gorm"
 
 	"github.com/rs/cors"
 	Init "pwcong.me/url-shortener/init"
+	"pwcong.me/url-shortener/model"
 	"pwcong.me/url-shortener/mux"
 	"pwcong.me/url-shortener/router"
 )
@@ -15,7 +17,9 @@ func main() {
 
 	myMux := mux.NewDBMux()
 
-	myMux.OpenDBConnection(Init.Config.DB.MySQL.User, Init.Config.DB.MySQL.Password, Init.Config.DB.MySQL.Address, Init.Config.DB.MySQL.DBName)
+	myMux.OpenDBConnection(Init.Config.DB.MySQL, func(db *gorm.DB) {
+		db.AutoMigrate(&model.Url{})
+	})
 	defer myMux.CloseDBConnection()
 
 	myMux.OpenRedisClient(&redis.Options{

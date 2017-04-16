@@ -9,6 +9,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"pwcong.me/panorama-tour-sys/utils/httpstatus"
+	Init "pwcong.me/url-shortener/init"
 )
 
 type Router interface {
@@ -39,14 +40,16 @@ func (mux *ServeMux) CloseRedisClient() {
 	mux.redisClient.Close()
 }
 
-func (mux *ServeMux) OpenDBConnection(user string, password string, address string, dbname string) {
+func (mux *ServeMux) OpenDBConnection(mysqlConfig Init.MySQLConfig, onConnected func(db *gorm.DB)) {
 
-	connectionURL := user + ":" + password + "@" + "tcp(" + address + ")/" + dbname + "?charset=utf8&parseTime=True&loc=Local"
+	connectionURL := mysqlConfig.User + ":" + mysqlConfig.Password + "@" + "tcp(" + mysqlConfig.Address + ")/" + mysqlConfig.DBName + "?charset=utf8&parseTime=True&loc=Local"
 
 	db, err := gorm.Open("mysql", connectionURL)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	onConnected(db)
 
 	mux.db = db
 

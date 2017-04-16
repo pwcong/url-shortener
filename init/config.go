@@ -24,18 +24,22 @@ const DEFAULT_CONFIG = `{
     }
 }`
 
+type MySQLConfig struct {
+	Address  string
+	DBName   string
+	User     string
+	Password string
+}
+
+type RedisConfig struct {
+	Address string
+}
+
 type config struct {
 	Addr string
 	DB   struct {
-		Redis struct {
-			Address string
-		}
-		MySQL struct {
-			Address  string
-			DBName   string
-			User     string
-			Password string
-		}
+		Redis RedisConfig
+		MySQL MySQLConfig
 	}
 }
 
