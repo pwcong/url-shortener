@@ -10,7 +10,7 @@ import (
 )
 
 const DEFAULT_CONFIG = `{
-    "server": "pwcong.me",
+    "server": "localhost",
     "host": "localhost",
     "port": "80",
     "db": {
