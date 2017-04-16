@@ -7,9 +7,7 @@ import (
 	"pwcong.me/url-shortener/mux"
 )
 
-type IndexController struct{}
-
-func (c IndexController) GetIndex(mux *mux.ServeMux, w http.ResponseWriter, r *http.Request) {
+func GetIndex(mux *mux.ServeMux, w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, "Hello")
 
