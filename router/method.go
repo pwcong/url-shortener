@@ -3,8 +3,6 @@ package router
 import (
 	"net/http"
 
-	"regexp"
-
 	"pwcong.me/url-shortener/mux"
 	"pwcong.me/url-shortener/utils/httpstatus"
 )
@@ -16,31 +14,20 @@ const (
 )
 
 // Get can register a get routes
-func Get(pattern string, mux *mux.ServeMux, w http.ResponseWriter, r *http.Request, route Route) {
-	handleByMethodAndPattern(pattern, GET, mux, w, r, route)
+func Get(mux *mux.ServeMux, w http.ResponseWriter, r *http.Request, route Route) {
+	handleByMethodAndPattern(GET, mux, w, r, route)
 }
 
 // Post can register a post routes
-func Post(pattern string, mux *mux.ServeMux, w http.ResponseWriter, r *http.Request, route Route) {
-	handleByMethodAndPattern(pattern, POST, mux, w, r, route)
+func Post(mux *mux.ServeMux, w http.ResponseWriter, r *http.Request, route Route) {
+	handleByMethodAndPattern(POST, mux, w, r, route)
 }
 
-func handleByMethodAndPattern(pattern string, method string, mux *mux.ServeMux, w http.ResponseWriter, r *http.Request, route Route) {
+func handleByMethodAndPattern(method string, mux *mux.ServeMux, w http.ResponseWriter, r *http.Request, route Route) {
 
-	matched, err := regexp.MatchString(pattern, r.URL.Path)
-
-	if matched && err == nil {
-		if r.Method == method {
-			route(mux, w, r)
-		} else {
-			httpstatus.StatusMethodNotAllowed(w)
-		}
+	if r.Method == method {
+		route(mux, w, r)
 	} else {
-
-		if err != nil {
-			httpstatus.StatusInternalServerError(w)
-		} else {
-			httpstatus.StatusBadRequest(w)
-		}
+		httpstatus.StatusMethodNotAllowed(w)
 	}
 }
