@@ -5,16 +5,20 @@ import (
 
 	"log"
 
-	"fmt"
-
 	"github.com/go-redis/redis"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"pwcong.me/panorama-tour-sys/utils/httpstatus"
 )
+
+type Router interface {
+	Routes(*ServeMux, http.ResponseWriter, *http.Request)
+}
 
 type ServeMux struct {
 	redisClient *redis.Client
 	db          *gorm.DB
+	router      Router
 }
 
 func (mux *ServeMux) OpenRedisClient(opt *redis.Options) {
@@ -52,11 +56,17 @@ func (mux *ServeMux) CloseDBConnection() {
 	mux.db.Close()
 }
 
-func (mux *ServeMux) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func (mux *ServeMux) RegisterRouter(router Router) {
+	mux.router = router
+}
 
-	fmt.Println(req.URL.Path)
+func (mux *ServeMux) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
-	fmt.Fprint(rw, "Hello")
+	if mux.router != nil {
+		mux.router.Routes(mux, w, req)
+	} else {
+		httpstatus.StatusBadRequest(w)
+	}
 
 }
 

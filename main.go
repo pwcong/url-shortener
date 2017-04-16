@@ -5,22 +5,31 @@ import (
 
 	"github.com/go-redis/redis"
 
+	"github.com/rs/cors"
 	Init "pwcong.me/url-shortener/init"
 	"pwcong.me/url-shortener/mux"
+	"pwcong.me/url-shortener/router"
 )
 
 func main() {
 
-	mux := mux.NewDBMux()
+	myMux := mux.NewDBMux()
 
-	mux.OpenDBConnection(Init.Config.DB.MySQL.User, Init.Config.DB.MySQL.Password, Init.Config.DB.MySQL.Address, Init.Config.DB.MySQL.DBName)
-	defer mux.CloseDBConnection()
+	myMux.OpenDBConnection(Init.Config.DB.MySQL.User, Init.Config.DB.MySQL.Password, Init.Config.DB.MySQL.Address, Init.Config.DB.MySQL.DBName)
+	defer myMux.CloseDBConnection()
 
-	mux.OpenRedisClient(&redis.Options{
+	myMux.OpenRedisClient(&redis.Options{
 		Addr: Init.Config.DB.Redis.Address,
 	})
-	defer mux.CloseRedisClient()
+	defer myMux.CloseRedisClient()
 
-	http.ListenAndServe(":80", mux)
+	myMux.RegisterRouter(router.Router{})
+
+	mux := http.NewServeMux()
+	mux.Handle("/", myMux)
+
+	handler := cors.Default().Handler(mux)
+
+	http.ListenAndServe(Init.Config.Addr, handler)
 
 }
