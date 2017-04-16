@@ -1,0 +1,14 @@
+{
+    "addr": ":80",
+    "db": {
+        "redis": {
+            "address": "localhost:6379"
+        },
+        "mysql": {
+            "address": "localhost:3306",
+            "dbname":"url_shortener",
+            "user":"pwcong",
+            "password":"123456"
+        }
+    }
+}
