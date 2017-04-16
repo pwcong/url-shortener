@@ -13,6 +13,6 @@ var Index IndexController
 
 func (c IndexController) GetIndex(mux *mux.ServeMux, w http.ResponseWriter, r *http.Request) {
 
-	fmt.Fprint(w, "Hello")
+	fmt.Fprint(w, "Hello World")
 
 }

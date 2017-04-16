@@ -10,7 +10,9 @@ import (
 )
 
 const DEFAULT_CONFIG = `{
-    "addr": ":80",
+    "server": "pwcong.me",
+    "host": "localhost",
+    "port": "80",
     "db": {
         "redis": {
             "address": "localhost:6379"
@@ -36,8 +38,10 @@ type RedisConfig struct {
 }
 
 type config struct {
-	Addr string
-	DB   struct {
+	Server string
+	Host   string
+	Port   string
+	DB     struct {
 		Redis RedisConfig
 		MySQL MySQLConfig
 	}
@@ -67,17 +71,41 @@ func loadConfig() {
 	///////////////////////////////////////////////////////
 	/*********** load configuration of addr **************/
 	///////////////////////////////////////////////////////
-	configAddrIF, ok := configMap["addr"]
+	configHostIF, ok := configMap["host"]
 	if !ok {
-		log.Fatal("can not load config.addr")
+		log.Fatal("can not load config.host")
 	}
 
-	configAddr, ok := configAddrIF.(string)
+	configHost, ok := configHostIF.(string)
 	if !ok {
-		log.Fatal("can not load config.addr")
+		log.Fatal("can not load config.host")
 	}
 
-	Config.Addr = configAddr
+	Config.Host = configHost
+
+	configServerIF, ok := configMap["server"]
+	if !ok {
+		log.Fatal("can not load config.server")
+	}
+
+	configServer, ok := configServerIF.(string)
+	if !ok {
+		log.Fatal("can not load config.server")
+	}
+
+	Config.Server = configServer
+
+	configPortIF, ok := configMap["port"]
+	if !ok {
+		log.Fatal("can not load config.server")
+	}
+
+	configPort, ok := configPortIF.(string)
+	if !ok {
+		log.Fatal("can not load config.server")
+	}
+
+	Config.Port = configPort
 
 	/////////////////////////////////////////////////////
 	/*********** load configuration of db **************/

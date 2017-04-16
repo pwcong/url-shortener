@@ -5,9 +5,9 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/jinzhu/gorm"
+	Init "pwcong.me/url-shortener/init"
 
 	"github.com/rs/cors"
-	Init "pwcong.me/url-shortener/init"
 	"pwcong.me/url-shortener/model"
 	"pwcong.me/url-shortener/mux"
 	"pwcong.me/url-shortener/router"
@@ -34,6 +34,6 @@ func main() {
 
 	handler := cors.Default().Handler(mux)
 
-	http.ListenAndServe(Init.Config.Addr, handler)
+	http.ListenAndServe(Init.Config.Host+":"+Init.Config.Port, handler)
 
 }

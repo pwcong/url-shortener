@@ -1,5 +1,7 @@
 {
-    "addr": ":80",
+    "server": "localhost",
+    "host": "localhost",
+    "port": "80",
     "db": {
         "redis": {
             "address": "localhost:6379"

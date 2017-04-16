@@ -17,8 +17,8 @@ type Router interface {
 }
 
 type ServeMux struct {
-	redisClient *redis.Client
-	db          *gorm.DB
+	RedisClient *redis.Client
+	DB          *gorm.DB
 	router      Router
 }
 
@@ -32,12 +32,12 @@ func (mux *ServeMux) OpenRedisClient(opt *redis.Options) {
 		log.Fatal(err.Error())
 	}
 
-	mux.redisClient = client
+	mux.RedisClient = client
 
 }
 
 func (mux *ServeMux) CloseRedisClient() {
-	mux.redisClient.Close()
+	mux.RedisClient.Close()
 }
 
 func (mux *ServeMux) OpenDBConnection(mysqlConfig Init.MySQLConfig, onConnected func(db *gorm.DB)) {
@@ -51,24 +51,24 @@ func (mux *ServeMux) OpenDBConnection(mysqlConfig Init.MySQLConfig, onConnected 
 
 	onConnected(db)
 
-	mux.db = db
+	mux.DB = db
 
 }
 
 func (mux *ServeMux) CloseDBConnection() {
-	mux.db.Close()
+	mux.DB.Close()
 }
 
 func (mux *ServeMux) RegisterRouter(router Router) {
 	mux.router = router
 }
 
-func (mux *ServeMux) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (mux *ServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if mux.router != nil {
-		mux.router.Routes(mux, w, req)
+		mux.router.Routes(mux, w, r)
 	} else {
-		httpstatus.StatusBadRequest(w)
+		httpstatus.StatusNotFound(w)
 	}
 
 }
