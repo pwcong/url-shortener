@@ -5,12 +5,12 @@ The online service that can transfrom long url into short url.
 * MySQL
 * Redis
 
-# Install
+# Install & Usage
 ```
 
 go build ./main.go
 
-// before you run it you must make sure the service mysql and redis service had been running
+// before you run it you must make sure the service mysql and redis had been running
 // configure ./conf/server.config.json
 
 ./main.exe
@@ -18,9 +18,29 @@ go build ./main.go
 
 ```
 
+**URL Shortener Service API:**
+${server|host}:${port}/api?url=${long_url}[&format=json]
+
+```
+eg.
+
+localhost/api?url=http://www.pwcong.me/     
+# localhost/ABCD
+
+localhost/api?url=http://www.pwcong.me/&format=json     
+# {"Err":"","LongUrl":"http://www.pwcong.me" "ShortUrl":"localhost/ABCD"}
+
+http://pwcong.me/api?url=https://github.com/
+# http://pwcong.me/EFGH
+
+127.0.0.1:8080/api?url=http://www.pwcong.me/
+# localhost:8080/ABCD
+```
+
 # Configuration
 ```
 {
+    "mode": "prod",         // prod | dev
     "server": "localhost",  // eg. http://pwcong.me which decide the short url prefix that can generate short url like http://pwcong.me/ABC
     "host": "localhost",    // server local ip address
     "port": "80",           // server listening port

@@ -8,10 +8,13 @@ import (
 
 	"fmt"
 
+	"regexp"
+
 	Init "pwcong.me/url-shortener/init"
 	"pwcong.me/url-shortener/model"
 	"pwcong.me/url-shortener/mux"
 	"pwcong.me/url-shortener/utils/httpstatus"
+	"pwcong.me/url-shortener/utils/logger"
 	"pwcong.me/url-shortener/utils/shortener"
 )
 
@@ -37,6 +40,7 @@ func handleConvertLongURL2ShortURLResponse(w http.ResponseWriter, format string,
 		})
 
 		if err != nil {
+			logger.Log2Error("UrlController", "handleConvertLongURL2ShortURLResponse", err.Error())
 			httpstatus.StatusInternalServerError(w)
 			return
 		}
@@ -54,7 +58,23 @@ func (c UrlController) GetConvertLongURL2ShortURL(mux *mux.ServeMux, w http.Resp
 
 	longURL := r.URL.Query().Get("url")
 
+	logger.Log2Server("UrlController", "GetConvertLongURL2ShortURL", longURL)
+
 	if longURL == "" {
+		httpstatus.StatusBadRequest(w)
+		return
+	}
+
+	m1, err := regexp.MatchString("^http://", longURL)
+	m2, err := regexp.MatchString("^https://", longURL)
+
+	if err != nil {
+		logger.Log2Error("UrlController", "GetConvertLongURL2ShortURL", err.Error())
+		httpstatus.StatusInternalServerError(w)
+		return
+	}
+
+	if !(m1 || m2) {
 		httpstatus.StatusBadRequest(w)
 		return
 	}
@@ -91,6 +111,7 @@ func (c UrlController) GetConvertLongURL2ShortURL(mux *mux.ServeMux, w http.Resp
 
 		err := mux.RedisClient.Set(longURL, shortURL, 0).Err()
 		if err != nil {
+			logger.Log2Error("UrlController", "GetConvertLongURL2ShortURL", err.Error())
 			httpstatus.StatusInternalServerError(w)
 			return
 		}
@@ -103,7 +124,7 @@ func (c UrlController) GetConvertLongURL2ShortURL(mux *mux.ServeMux, w http.Resp
 
 	shortURL := shortener.ConvertInt64ToString(url.ID)
 
-	err := mux.RedisClient.Set(longURL, shortURL, 0).Err()
+	err = mux.RedisClient.Set(longURL, shortURL, 0).Err()
 	if err != nil {
 		httpstatus.StatusInternalServerError(w)
 		return
@@ -117,6 +138,8 @@ func (c UrlController) GetConvertShortURL2LongURL(mux *mux.ServeMux, w http.Resp
 
 	shortURL := r.URL.Path[1:]
 
+	logger.Log2Server("UrlController", "GetConvertShortURL2LongURL", shortURL)
+
 	val := mux.RedisClient.Get(shortURL).Val()
 
 	if val != "" {
@@ -128,6 +151,7 @@ func (c UrlController) GetConvertShortURL2LongURL(mux *mux.ServeMux, w http.Resp
 	id, err := shortener.ConvertStringToInt64(shortURL)
 
 	if err != nil {
+		logger.Log2Error("UrlController", "GetConvertShortURL2LongURL", err.Error())
 		httpstatus.StatusInternalServerError(w)
 		return
 	}
@@ -145,6 +169,7 @@ func (c UrlController) GetConvertShortURL2LongURL(mux *mux.ServeMux, w http.Resp
 
 	err = mux.RedisClient.Set(shortURL, url.Source, 0).Err()
 	if err != nil {
+		logger.Log2Error("UrlController", "GetConvertShortURL2LongURL", err.Error())
 		httpstatus.StatusInternalServerError(w)
 		return
 	}

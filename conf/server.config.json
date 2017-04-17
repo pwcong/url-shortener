@@ -1,4 +1,5 @@
 {
+    "mode": "prod",
     "server": "localhost",
     "host": "localhost",
     "port": "80",

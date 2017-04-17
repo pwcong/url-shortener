@@ -10,6 +10,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"pwcong.me/panorama-tour-sys/utils/httpstatus"
 	Init "pwcong.me/url-shortener/init"
+	"pwcong.me/url-shortener/utils/logger"
 )
 
 type Router interface {
@@ -64,6 +65,8 @@ func (mux *ServeMux) RegisterRouter(router Router) {
 }
 
 func (mux *ServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	logger.Log2Access(r.RemoteAddr, r.Method, r.URL.Path)
 
 	if mux.router != nil {
 		mux.router.Routes(mux, w, r)

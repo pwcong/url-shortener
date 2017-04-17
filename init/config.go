@@ -10,6 +10,7 @@ import (
 )
 
 const DEFAULT_CONFIG = `{
+	"mode": "prod",
     "server": "localhost",
     "host": "localhost",
     "port": "80",
@@ -38,6 +39,7 @@ type RedisConfig struct {
 }
 
 type config struct {
+	Mode   string
 	Server string
 	Host   string
 	Port   string
@@ -97,15 +99,27 @@ func loadConfig() {
 
 	configPortIF, ok := configMap["port"]
 	if !ok {
-		log.Fatal("can not load config.server")
+		log.Fatal("can not load config.port")
 	}
 
 	configPort, ok := configPortIF.(string)
 	if !ok {
-		log.Fatal("can not load config.server")
+		log.Fatal("can not load config.port")
 	}
 
 	Config.Port = configPort
+
+	configModeIF, ok := configMap["mode"]
+	if !ok {
+		log.Fatal("can not load config.mode")
+	}
+
+	configMode, ok := configModeIF.(string)
+	if !ok {
+		log.Fatal("can not load config.mode")
+	}
+
+	Config.Mode = configMode
 
 	/////////////////////////////////////////////////////
 	/*********** load configuration of db **************/
