@@ -10,12 +10,12 @@ import (
 
 	"regexp"
 
-	Init "pwcong.me/url-shortener/init"
-	"pwcong.me/url-shortener/model"
-	"pwcong.me/url-shortener/mux"
-	"pwcong.me/url-shortener/utils/httpstatus"
-	"pwcong.me/url-shortener/utils/logger"
-	"pwcong.me/url-shortener/utils/shortener"
+	Init "github.com/pwcong/url-shortener/init"
+	"github.com/pwcong/url-shortener/model"
+	"github.com/pwcong/url-shortener/mux"
+	"github.com/pwcong/url-shortener/utils/httpstatus"
+	"github.com/pwcong/url-shortener/utils/logger"
+	"github.com/pwcong/url-shortener/utils/shortener"
 )
 
 type UrlJSONResponse struct {

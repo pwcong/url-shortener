@@ -5,12 +5,12 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/jinzhu/gorm"
-	Init "pwcong.me/url-shortener/init"
+	Init "github.com/pwcong/url-shortener/init"
 
+	"github.com/pwcong/url-shortener/model"
+	"github.com/pwcong/url-shortener/mux"
+	"github.com/pwcong/url-shortener/router"
 	"github.com/rs/cors"
-	"pwcong.me/url-shortener/model"
-	"pwcong.me/url-shortener/mux"
-	"pwcong.me/url-shortener/router"
 )
 
 func main() {

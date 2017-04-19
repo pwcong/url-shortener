@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	Init "pwcong.me/url-shortener/init"
+	Init "github.com/pwcong/url-shortener/init"
 )
 
 // LOGFORMAT decide the format of log.

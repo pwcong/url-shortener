@@ -7,9 +7,9 @@ import (
 
 	"log"
 
-	"pwcong.me/url-shortener/controller"
-	"pwcong.me/url-shortener/mux"
-	"pwcong.me/url-shortener/utils/httpstatus"
+	"github.com/pwcong/url-shortener/controller"
+	"github.com/pwcong/url-shortener/mux"
+	"github.com/pwcong/url-shortener/utils/httpstatus"
 )
 
 const (

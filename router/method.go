@@ -3,8 +3,8 @@ package router
 import (
 	"net/http"
 
-	"pwcong.me/url-shortener/mux"
-	"pwcong.me/url-shortener/utils/httpstatus"
+	"github.com/pwcong/url-shortener/mux"
+	"github.com/pwcong/url-shortener/utils/httpstatus"
 )
 
 // Request Method Name

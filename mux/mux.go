@@ -8,9 +8,9 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"pwcong.me/panorama-tour-sys/utils/httpstatus"
-	Init "pwcong.me/url-shortener/init"
-	"pwcong.me/url-shortener/utils/logger"
+	Init "github.com/pwcong/url-shortener/init"
+	"github.com/pwcong/url-shortener/utils/httpstatus"
+	"github.com/pwcong/url-shortener/utils/logger"
 )
 
 type Router interface {

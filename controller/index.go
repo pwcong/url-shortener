@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"pwcong.me/url-shortener/mux"
+	"github.com/pwcong/url-shortener/mux"
 )
 
 type IndexController struct{}
