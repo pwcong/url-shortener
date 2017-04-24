@@ -1,7 +1,7 @@
 {
     "mode": "prod",
-    "server": "localhost",
-    "host": "localhost",
+    "domain": "localhost",
+    "host": "0.0.0.0",
     "port": "80",
     "db": {
         "redis": {

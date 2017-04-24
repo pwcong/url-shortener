@@ -11,8 +11,8 @@ import (
 
 const DEFAULT_CONFIG = `{
 	"mode": "prod",
-    "server": "localhost",
-    "host": "localhost",
+    "domain": "localhost",
+    "host": "0.0.0.0",
     "port": "80",
     "db": {
         "redis": {
@@ -40,7 +40,7 @@ type RedisConfig struct {
 
 type config struct {
 	Mode   string
-	Server string
+	Domain string
 	Host   string
 	Port   string
 	DB     struct {
@@ -85,17 +85,17 @@ func loadConfig() {
 
 	Config.Host = configHost
 
-	configServerIF, ok := configMap["server"]
+	configDomainIF, ok := configMap["domain"]
 	if !ok {
-		log.Fatal("can not load config.server")
+		log.Fatal("can not load config.domain")
 	}
 
-	configServer, ok := configServerIF.(string)
+	configDomain, ok := configDomainIF.(string)
 	if !ok {
-		log.Fatal("can not load config.server")
+		log.Fatal("can not load config.domain")
 	}
 
-	Config.Server = configServer
+	Config.Domain = configDomain
 
 	configPortIF, ok := configMap["port"]
 	if !ok {

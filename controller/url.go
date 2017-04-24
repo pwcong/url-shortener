@@ -181,8 +181,8 @@ func (c UrlController) GetConvertShortURL2LongURL(mux *mux.ServeMux, w http.Resp
 func init() {
 
 	if Init.Config.Port == "80" {
-		UrlJSONResponsePrefix = Init.Config.Server + "/"
+		UrlJSONResponsePrefix = "http://" + Init.Config.Domain + "/"
 	} else {
-		UrlJSONResponsePrefix = Init.Config.Server + ":" + Init.Config.Port + "/"
+		UrlJSONResponsePrefix = "http://" + Init.Config.Domain + ":" + Init.Config.Port + "/"
 	}
 }

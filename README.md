@@ -41,8 +41,8 @@ http://pwcong.me/api?url=https://github.com/
 ```
 {
     "mode": "prod",         // prod | dev
-    "server": "localhost",  // eg. http://pwcong.me which decide the short url prefix that can generate short url like http://pwcong.me/ABC
-    "host": "localhost",    // server local ip address
+    "domain": "localhost",  // eg. pwcong.me which decide the short url prefix that can generate short url like http://pwcong.me/ABC
+    "host": "0.0.0.0",      // server public ip address
     "port": "80",           // server listening port
     "db": {
         "redis": {
