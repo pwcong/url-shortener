@@ -1,188 +1,100 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
-	"time"
+	"strconv"
 
-	"encoding/json"
-
-	"fmt"
-
-	"regexp"
-
-	Init "github.com/pwcong/url-shortener/init"
-	"github.com/pwcong/url-shortener/model"
-	"github.com/pwcong/url-shortener/mux"
-	"github.com/pwcong/url-shortener/utils/httpstatus"
-	"github.com/pwcong/url-shortener/utils/logger"
-	"github.com/pwcong/url-shortener/utils/shortener"
+	"github.com/labstack/echo"
+	"github.com/pwcong/url-shortener/service"
 )
 
+type UrlController struct {
+	Base *BaseController
+}
+
+type UrlForm struct {
+	SourceUrl string `json:"source_url" form:"source_url"`
+}
+
 type UrlJSONResponse struct {
-	Err      string
-	LongUrl  string
-	ShortUrl string
+	SourceUrl string `json:"source_url"`
+	ShortUrl  string `json:"short_url"`
 }
 
-var UrlJSONResponsePrefix string
+func (ctx *UrlController) Redirect(c echo.Context) error {
 
-type UrlController struct{}
+	service := service.UrlService{Base: ctx.Base.Service}
 
-var Url UrlController
+	_id := c.Param("id")
 
-func handleConvertLongURL2ShortURLResponse(w http.ResponseWriter, format string, longUrl string, shortUrl string) {
-
-	if format == "json" {
-
-		res, err := json.Marshal(UrlJSONResponse{
-			LongUrl:  longUrl,
-			ShortUrl: UrlJSONResponsePrefix + shortUrl,
-		})
-
-		if err != nil {
-			logger.Log2Error("UrlController", "handleConvertLongURL2ShortURLResponse", err.Error())
-			httpstatus.StatusInternalServerError(w)
-			return
-		}
-
-		w.Write(res)
-
-	} else {
-
-		fmt.Fprint(w, UrlJSONResponsePrefix+shortUrl)
-
-	}
-}
-
-func (c UrlController) GetConvertLongURL2ShortURL(mux *mux.ServeMux, w http.ResponseWriter, r *http.Request) {
-
-	longURL := r.URL.Query().Get("url")
-
-	logger.Log2Server("UrlController", "GetConvertLongURL2ShortURL", longURL)
-
-	if longURL == "" {
-		httpstatus.StatusBadRequest(w)
-		return
-	}
-
-	m1, err := regexp.MatchString("^http://", longURL)
-	m2, err := regexp.MatchString("^https://", longURL)
-
+	id, err := strconv.Atoi(_id)
 	if err != nil {
-		logger.Log2Error("UrlController", "GetConvertLongURL2ShortURL", err.Error())
-		httpstatus.StatusInternalServerError(w)
-		return
+		return err
 	}
 
-	if !(m1 || m2) {
-		httpstatus.StatusBadRequest(w)
-		return
-	}
-
-	format := r.URL.Query().Get("format")
-
-	/*
-	 * search from redis
-	 */
-	val := mux.RedisClient.Get(longURL).Val()
-
-	if val != "" {
-
-		handleConvertLongURL2ShortURLResponse(w, format, longURL, val)
-
-		return
-	}
-
-	var url model.Url
-	notFound := mux.DB.First(&url, "source = ?", longURL).RecordNotFound()
-
-	if notFound {
-
-		mux.DB.Create(&model.Url{Source: longURL, CreatedAt: time.Now()})
-
-		notFound = mux.DB.First(&url, "source = ?", longURL).RecordNotFound()
-
-		if notFound {
-			httpstatus.StatusInternalServerError(w)
-			return
-		}
-
-		shortURL := shortener.ConvertInt64ToString(url.ID)
-
-		err := mux.RedisClient.Set(longURL, shortURL, 0).Err()
-		if err != nil {
-			logger.Log2Error("UrlController", "GetConvertLongURL2ShortURL", err.Error())
-			httpstatus.StatusInternalServerError(w)
-			return
-		}
-
-		handleConvertLongURL2ShortURLResponse(w, format, longURL, shortURL)
-
-		return
-
-	}
-
-	shortURL := shortener.ConvertInt64ToString(url.ID)
-
-	err = mux.RedisClient.Set(longURL, shortURL, 0).Err()
+	sourceUrl, err := service.ConvertShort2Long(uint(id))
 	if err != nil {
-		httpstatus.StatusInternalServerError(w)
-		return
+		return err
 	}
 
-	handleConvertLongURL2ShortURLResponse(w, format, longURL, shortURL)
+	return c.Redirect(http.StatusMovedPermanently, sourceUrl)
 
 }
 
-func (c UrlController) GetConvertShortURL2LongURL(mux *mux.ServeMux, w http.ResponseWriter, r *http.Request) {
+func (ctx *UrlController) CL2S(c echo.Context) error {
 
-	shortURL := r.URL.Path[1:]
+	service := service.UrlService{Base: ctx.Base.Service}
 
-	logger.Log2Server("UrlController", "GetConvertShortURL2LongURL", shortURL)
-
-	val := mux.RedisClient.Get(shortURL).Val()
-
-	if val != "" {
-		http.Redirect(w, r, val, 302)
-
-		return
+	form := new(UrlForm)
+	if err := c.Bind(form); err != nil {
+		return err
 	}
 
-	id, err := shortener.ConvertStringToInt64(shortURL)
+	if form.SourceUrl == "" {
+		return errors.New("source url can not be empty")
+	}
 
+	id, err := service.ConvertLong2Short(form.SourceUrl)
 	if err != nil {
-		logger.Log2Error("UrlController", "GetConvertShortURL2LongURL", err.Error())
-		httpstatus.StatusInternalServerError(w)
-		return
+		return err
 	}
 
-	var url model.Url
-
-	notFound := mux.DB.First(&url, id).RecordNotFound()
-
-	if notFound {
-
-		httpstatus.StatusNotFound(w)
-		return
-
+	proto, ok := PROTOS[c.Request().Proto]
+	if !ok {
+		return errors.New("invalid http proto")
 	}
 
-	err = mux.RedisClient.Set(shortURL, url.Source, 0).Err()
-	if err != nil {
-		logger.Log2Error("UrlController", "GetConvertShortURL2LongURL", err.Error())
-		httpstatus.StatusInternalServerError(w)
-		return
-	}
-
-	http.Redirect(w, r, url.Source, 302)
+	return BaseResponse(c, true, STATUS_OK, "convert long url to short url successfully", UrlJSONResponse{
+		SourceUrl: form.SourceUrl,
+		ShortUrl:  proto + c.Request().Host + "/" + id,
+	})
 
 }
+func (ctx *UrlController) CS2L(c echo.Context) error {
 
-func init() {
+	service := service.UrlService{Base: ctx.Base.Service}
 
-	if Init.Config.Port == "80" {
-		UrlJSONResponsePrefix = "http://" + Init.Config.Domain + "/"
-	} else {
-		UrlJSONResponsePrefix = "http://" + Init.Config.Domain + ":" + Init.Config.Port + "/"
+	_id := c.Param("id")
+
+	id, err := strconv.Atoi(_id)
+	if err != nil {
+		return err
 	}
+
+	sourceUrl, err := service.ConvertShort2Long(uint(id))
+	if err != nil {
+		return err
+	}
+
+	proto, ok := PROTOS[c.Request().Proto]
+	if !ok {
+		return errors.New("invalid http proto")
+	}
+
+	return BaseResponse(c, true, STATUS_OK, "convert long url to short url successfully", UrlJSONResponse{
+		SourceUrl: sourceUrl,
+		ShortUrl:  proto + c.Request().Host + "/" + _id,
+	})
+
 }

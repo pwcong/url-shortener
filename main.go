@@ -1,39 +1,100 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/go-redis/redis"
-	"github.com/jinzhu/gorm"
-	Init "github.com/pwcong/url-shortener/init"
 
+	"github.com/jinzhu/gorm"
+	"github.com/labstack/echo"
+	"github.com/pwcong/url-shortener/config"
+	"github.com/pwcong/url-shortener/controller"
+	"github.com/pwcong/url-shortener/db"
+	"github.com/pwcong/url-shortener/middleware"
 	"github.com/pwcong/url-shortener/model"
-	"github.com/pwcong/url-shortener/mux"
 	"github.com/pwcong/url-shortener/router"
-	"github.com/rs/cors"
 )
+
+func initMiddlewares(e *echo.Echo, conf *config.Config) {
+	middleware.Init(e, conf)
+}
+
+func initRoutes(e *echo.Echo, conf *config.Config, db *gorm.DB, client *redis.Client) {
+
+	router.Init(e, conf, db, client)
+
+}
+
+func initDB(db *gorm.DB) {
+	db.AutoMigrate(&model.Url{})
+}
 
 func main() {
 
-	myMux := mux.NewDBMux()
+	// 初始化配置
+	conf, err := config.Initialize()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	myMux.OpenDBConnection(Init.Config.DB.MySQL, func(db *gorm.DB) {
-		db.AutoMigrate(&model.Url{})
+	mySQLConfig, ok := conf.Databases["mysql"]
+	if !ok {
+		log.Fatal("Can not load configuration of MySQL")
+	}
+
+	orm := db.ORM{DB: nil, Name: "mysql"}
+
+	orm.Open(
+		mySQLConfig.Username,
+		mySQLConfig.Password,
+		mySQLConfig.Host+":"+strconv.Itoa(mySQLConfig.Port),
+		mySQLConfig.DBName)
+
+	defer orm.Close()
+
+	redisConfig, ok := conf.Databases["redis"]
+	if !ok {
+		log.Fatal("Can not load configuration of Redis")
+	}
+
+	client := redis.NewClient(&redis.Options{
+		Addr: redisConfig.Host + ":" + strconv.Itoa(redisConfig.Port),
 	})
-	defer myMux.CloseDBConnection()
+	_, err = client.Ping().Result()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer client.Close()
 
-	myMux.OpenRedisClient(&redis.Options{
-		Addr: Init.Config.DB.Redis.Address,
-	})
-	defer myMux.CloseRedisClient()
+	initDB(orm.DB)
 
-	myMux.RegisterRouter(router.Router{})
+	e := echo.New()
 
-	mux := http.NewServeMux()
-	mux.Handle("/", myMux)
+	// 全局错误处理
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		c.JSON(http.StatusOK, controller.BaseResponseJSON{
+			Success: false,
+			Code:    controller.STATUS_ERROR,
+			Message: err.Error(),
+		})
+	}
 
-	handler := cors.Default().Handler(mux)
+	// 初始化中间件
+	initMiddlewares(e, &conf)
+	// 初始化路由
+	initRoutes(e, &conf, orm.DB, client)
 
-	http.ListenAndServe(Init.Config.Host+":"+Init.Config.Port, handler)
+	// 运行服务
+	if conf.Server.Port == 80 {
+		e.Logger.Fatal(e.Start(conf.Server.Host))
+	} else {
+		e.Logger.Fatal(e.Start(conf.Server.Host + ":" + strconv.Itoa(conf.Server.Port)))
+	}
+
+}
+
+func init() {
 
 }
