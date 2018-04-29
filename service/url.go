@@ -28,6 +28,9 @@ func (ctx *UrlService) ConvertLong2Short(sourceUrl string) (string, error) {
 		if err := db.Create(&url).Error; err != nil {
 			return "", err
 		}
+		if err := client.Set(sourceUrl, url.ID, 0).Err(); err != nil {
+			return "", err
+		}
 	}
 
 	return strconv.Itoa(int(url.ID)), nil
@@ -46,6 +49,10 @@ func (ctx *UrlService) ConvertShort2Long(id uint) (string, error) {
 	var url model.Url
 	if notFound := db.Where("id = ?", id).First(&url).RecordNotFound(); notFound {
 		return "", errors.New("short url has not been registered")
+	}
+
+	if err := client.Set(strconv.Itoa(int(id)), url.SourceUrl, 0).Err(); err != nil {
+		return "", err
 	}
 
 	return url.SourceUrl, nil
