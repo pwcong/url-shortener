@@ -1,59 +1,47 @@
 # URL Shortener
 The online service that can transfrom long url into short url.
 
-# Require
+## Require
 * MySQL
 * Redis
 
-# Install & Usage
-```
-
-go build ./main.go
+## Install & Usage
+```shell
+> go get .
+> go build
 
 // before you run it you must make sure the service mysql and redis had been running
-// configure ./conf/server.config.json
+// configure ./conf/default.toml
 
-./main.exe
-
-
-```
-
-**URL Shortener Service API:**
-${server|host}:${port}/api?url=${long_url}[&format=json]
+> ./url-shortener.exe
 
 ```
-eg.
 
-localhost/api?url=http://www.pwcong.me/     
-# localhost/ABCD
+## Configuration
 
-localhost/api?url=http://www.pwcong.me/&format=json     
-# {"Err":"","LongUrl":"http://www.pwcong.me" "ShortUrl":"localhost/ABCD"}
+```toml
+[server]
+host = "0.0.0.0"
+port = 7001
 
-http://pwcong.me/api?url=https://github.com/
-# http://pwcong.me/EFGH
+[middlewares]
 
-127.0.0.1:8080/api?url=http://www.pwcong.me/
-# localhost:8080/ABCD
-```
+    [middlewares.cors]
+    active = true
+    [middlewares.logger]
+    active = true
 
-# Configuration
-```
-{
-    "mode": "prod",         // prod | dev
-    "domain": "localhost",  // eg. pwcong.me which decide the short url prefix that can generate short url like http://pwcong.me/ABC
-    "host": "0.0.0.0",      // server public ip address
-    "port": "80",           // server listening port
-    "db": {
-        "redis": {
-            "address": "localhost:6379" // redis service listening address
-        },
-        "mysql": {
-            "address": "localhost:3306",    // mysql service listening address
-            "dbname":"url_shortener",       // database name
-            "user":"pwcong",                
-            "password":"123456"
-        }
-    }
-}
+[databases]
+
+    [databases.mysql]
+    host = "127.0.0.1"
+    port = 3306
+    username = "root"
+    password = "root"
+    dbname = "url_shortener"
+
+    [databases.redis]
+    host = "127.0.0.1"
+    port = 6379
+
 ```
