@@ -26,3 +26,6 @@ _testmain.go
 
 # Redis
 *.rdb
+
+# Ignore custom files
+url_shrotener
