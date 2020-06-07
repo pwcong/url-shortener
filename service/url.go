@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/pwcong/url-shortener/model"
+	"url-shortener/model"
 )
 
 type UrlService struct {

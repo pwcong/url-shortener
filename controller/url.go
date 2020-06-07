@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo"
-	"github.com/pwcong/url-shortener/service"
+	"github.com/labstack/echo/v4"
+	"url-shortener/service"
 )
 
 type UrlController struct {

@@ -3,9 +3,9 @@ package controller
 import (
 	"net/http"
 
-	"github.com/labstack/echo"
-	"github.com/pwcong/url-shortener/config"
-	"github.com/pwcong/url-shortener/service"
+	"github.com/labstack/echo/v4"
+	"url-shortener/config"
+	"url-shortener/service"
 )
 
 const (

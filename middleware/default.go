@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
-	"github.com/pwcong/url-shortener/config"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"url-shortener/config"
 )
 
 func Init(e *echo.Echo, conf *config.Config) {

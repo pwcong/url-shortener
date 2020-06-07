@@ -7,14 +7,15 @@ import (
 
 	"github.com/go-redis/redis"
 
+	"url-shortener/config"
+	"url-shortener/controller"
+	"url-shortener/db"
+	"url-shortener/middleware"
+	"url-shortener/model"
+	"url-shortener/router"
+
 	"github.com/jinzhu/gorm"
-	"github.com/labstack/echo"
-	"github.com/pwcong/url-shortener/config"
-	"github.com/pwcong/url-shortener/controller"
-	"github.com/pwcong/url-shortener/db"
-	"github.com/pwcong/url-shortener/middleware"
-	"github.com/pwcong/url-shortener/model"
-	"github.com/pwcong/url-shortener/router"
+	"github.com/labstack/echo/v4"
 )
 
 func initMiddlewares(e *echo.Echo, conf *config.Config) {

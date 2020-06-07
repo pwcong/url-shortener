@@ -3,10 +3,10 @@ package router
 import (
 	"github.com/go-redis/redis"
 	"github.com/jinzhu/gorm"
-	"github.com/labstack/echo"
-	"github.com/pwcong/url-shortener/config"
-	"github.com/pwcong/url-shortener/controller"
-	"github.com/pwcong/url-shortener/service"
+	"github.com/labstack/echo/v4"
+	"url-shortener/config"
+	"url-shortener/controller"
+	"url-shortener/service"
 )
 
 func Init(e *echo.Echo, conf *config.Config, db *gorm.DB, client *redis.Client) {
